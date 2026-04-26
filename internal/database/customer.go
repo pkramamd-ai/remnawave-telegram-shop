@@ -207,6 +207,39 @@ func (cr *CustomerRepository) UpdateFields(ctx context.Context, id int64, update
 	return nil
 }
 
+// FindAllTelegramIds returns the Telegram user IDs of every customer in the
+// table, ordered by creation time (oldest first). Intended for admin
+// broadcast / analytics flows that only need the chat IDs.
+func (cr *CustomerRepository) FindAllTelegramIds(ctx context.Context) ([]int64, error) {
+	sqlStr, args, err := sq.Select("telegram_id").
+		From("customer").
+		OrderBy("created_at ASC").
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build select query: %w", err)
+	}
+
+	rows, err := cr.pool.Query(ctx, sqlStr, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query telegram ids: %w", err)
+	}
+	defer rows.Close()
+
+	var ids []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, fmt.Errorf("failed to scan telegram_id: %w", err)
+		}
+		ids = append(ids, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating telegram ids: %w", err)
+	}
+	return ids, nil
+}
+
 func (cr *CustomerRepository) FindByTelegramIds(ctx context.Context, telegramIDs []int64) ([]Customer, error) {
 	buildSelect := sq.Select("id", "telegram_id", "expire_at", "created_at", "subscription_link", "language").
 		From("customer").
