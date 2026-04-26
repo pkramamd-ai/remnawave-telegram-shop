@@ -2,13 +2,15 @@ name: Build docker image
 
 on:
   push:
+    branches:
+      - main
     tags:
       - '*'
   workflow_dispatch:
 
 jobs:
   build-docker-image:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       packages: write
     steps:
@@ -30,8 +32,8 @@ jobs:
           images: ghcr.io/${{ github.repository_owner }}/remnawave-telegram-shop-bot
           # Set up proper tagging strategy
           tags: |
-            # Always include latest tag
-            type=raw,value=latest,enable=${{ github.ref_type == 'tag' }}
+            # latest = newest commit on main OR newest semver tag
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' || github.ref_type == 'tag' }}
             # Use semver tags when Git tag is in semver format
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
