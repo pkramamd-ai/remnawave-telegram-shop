@@ -13,6 +13,7 @@ import (
 	"remnawave-tg-shop-bot/internal/config"
 	"remnawave-tg-shop-bot/internal/cryptopay"
 	"remnawave-tg-shop-bot/internal/database"
+	"remnawave-tg-shop-bot/internal/exchange"
 	"remnawave-tg-shop-bot/internal/handler"
 	"remnawave-tg-shop-bot/internal/moynalog"
 	"remnawave-tg-shop-bot/internal/notification"
@@ -80,7 +81,20 @@ func main() {
 	cryptoPayClient := cryptopay.NewCryptoPayClient(config.CryptoPayUrl(), config.CryptoPayToken())
 	remnawaveClient := remnawave.NewClient(config.RemnawaveUrl(), config.RemnawaveToken(), config.RemnawaveMode())
 	yookasaClient := yookasa.NewClient(config.YookasaUrl(), config.YookasaShopId(), config.YookasaSecretKey())
-	botOpts := []bot.Option{bot.WithWorkers(3)}
+	botOpts := []bot.Option{
+		bot.WithWorkers(3),
+		// Explicitly request callback_query updates. Telegram remembers the last
+		// allowed_updates list per bot, so reusing a token that was previously
+		// configured with only ["message"] would silently drop button clicks.
+		bot.WithAllowedUpdates(bot.AllowedUpdates{
+			"message",
+			"callback_query",
+			"inline_query",
+			"pre_checkout_query",
+			"my_chat_member",
+			"chat_member",
+		}),
+	}
 	if proxyStr := config.TelegramProxyURL(); proxyStr != "" {
 		proxyURL, parseErr := url.Parse(proxyStr)
 		if parseErr != nil {
@@ -114,7 +128,9 @@ func main() {
 
 	syncService := sync.NewSyncService(remnawaveClient, customerRepository)
 
-	h := handler.NewHandler(syncService, paymentService, tm, customerRepository, purchaseRepository, cryptoPayClient, yookasaClient, referralRepository, cache)
+	exchangeProvider := exchange.NewProvider()
+
+	h := handler.NewHandler(syncService, paymentService, tm, customerRepository, purchaseRepository, cryptoPayClient, yookasaClient, referralRepository, cache, exchangeProvider)
 
 	me, err := b.GetMe(ctx)
 	if err != nil {
