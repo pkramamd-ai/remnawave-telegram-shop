@@ -1,0 +1,110 @@
+{
+  "greeting": "👋🏻 <b>你好</b>\n这是一个用于连接 <b>VPN</b>🛡 的机器人\n\n<b>如何连接：</b>\n• 点击 <b>连接</b> 按钮\n• 按照简短的说明操作",
+  "buy_button": {
+    "text": "购买",
+    "emoji_id": "5258165702707125574"
+  },
+  "connect_button": {
+    "text": "连接",
+    "emoji_id": "5843553939672274145"
+  },
+  "back_button": {
+    "text": "返回",
+    "emoji_id": "6039539366177541657"
+  },
+  "pricing_info": "支持银行卡和加密货币付款",
+  "month_1": {
+    "text": "1 个月",
+    "emoji_id": "5890937706803894250"
+  },
+  "month_3": {
+    "text": "3 个月",
+    "emoji_id": "5890937706803894250"
+  },
+  "month_6": {
+    "text": "6 个月",
+    "emoji_id": "5890937706803894250"
+  },
+  "month_12": {
+    "text": "12 个月",
+    "emoji_id": "5890937706803894250"
+  },
+  "crypto_button": {
+    "text": "加密货币",
+    "emoji_id": "5402186569006210455"
+  },
+  "card_button": {
+    "text": "银行卡",
+    "emoji_id": "5258165702707125574"
+  },
+  "pay_button": {
+    "text": "支付",
+    "emoji_id": "5436386989857320953"
+  },
+  "subscription_active": "您的订阅有效期至：%s",
+  "subscription_link": "\n\n订阅链接：%s",
+  "no_subscription": "您目前没有有效的订阅",
+  "subscription_activated": "您的订阅已激活！",
+  "feedback_button": {
+    "text": "反馈",
+    "emoji_id": "5379600444098093058"
+  },
+  "server_status_button": {
+    "text": "服务器状态",
+    "emoji_id": "5805532930662996322"
+  },
+  "support_button": {
+    "text": "客服支持",
+    "emoji_id": "6301027265899661025"
+  },
+  "channel_button": {
+    "text": "频道",
+    "emoji_id": "6021418126061605425"
+  },
+  "tos_button": {
+    "text": "服务条款",
+    "emoji_id": "5886330010054168711"
+  },
+  "subscription_expiring": "⚠️ <b>订阅提醒</b> ⚠️\n\n您的订阅将于 %s 到期\n为了继续使用服务，请续订",
+  "renew_subscription_button": {
+    "text": "续订",
+    "emoji_id": "5260687681733533075"
+  },
+  "invoice_description": "订阅",
+  "invoice_label": "订阅",
+  "invoice_title": "订阅",
+  "trial_button": {
+    "text": "免费试用",
+    "emoji_id": "5089506485931606869"
+  },
+  "trial_activated": "试用期已激活",
+  "trial_text": "您的试用版正在使用中",
+  "activate_trial_button": {
+    "text": "激活试用版",
+    "emoji_id": "5089506485931606869"
+  },
+  "referral_button": {
+    "text": "推荐好友",
+    "emoji_id": "6032594876506312598"
+  },
+  "referral_text": "已邀请：%d",
+  "referral_bonus_granted": "您已获得推荐奖励！",
+  "stars_button": {
+    "text": "Telegram Stars",
+    "emoji_id": "5373082993207921989"
+  },
+  "share_referral_button": {
+    "text": "分享！",
+    "emoji_id": "5429651785352501917"
+  },
+  "web_app_button_text": {
+    "text": "连接",
+    "emoji_id": "5843553939672274145"
+  },
+  "tribute_button": {
+    "text": "Tribute",
+    "emoji_id": "5258165702707125574"
+  },
+  "tribute_cancelled": "Tribute 已取消",
+  "access_denied": "⚠️ 访问被拒绝。请更新您的个人资料。"
+}
