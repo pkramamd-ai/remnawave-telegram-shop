@@ -66,13 +66,9 @@ func (h Handler) BuyCallbackHandler(ctx context.Context, b *bot.Bot, update *mod
 	}
 }
 
-func (h Handler) SellCallbackHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	callback := update.CallbackQuery.Message.Message
-	callbackQuery := parseCallbackData(update.CallbackQuery.Data)
-	langCode := update.CallbackQuery.From.LanguageCode
-	month := callbackQuery["month"]
-	amount := callbackQuery["amount"]
-
+// BuildSellKeyboard returns the payment-methods keyboard for a given month/amount.
+// Shared by SellCallbackHandler (button click) and StartCommandHandler (deep link).
+func (h Handler) BuildSellKeyboard(ctx context.Context, chatID int64, langCode, month, amount string) [][]models.InlineKeyboardButton {
 	var keyboard [][]models.InlineKeyboardButton
 
 	if config.IsCryptoPayEnabled() {
@@ -91,7 +87,7 @@ func (h Handler) SellCallbackHandler(ctx context.Context, b *bot.Bot, update *mo
 		shouldShowStarsButton := true
 
 		if config.RequirePaidPurchaseForStars() {
-			customer, err := h.customerRepository.FindByTelegramId(ctx, callback.Chat.ID)
+			customer, err := h.customerRepository.FindByTelegramId(ctx, chatID)
 			if err != nil {
 				slog.Error("Error finding customer for stars check", "error", err)
 				shouldShowStarsButton = false
@@ -124,6 +120,18 @@ func (h Handler) SellCallbackHandler(ctx context.Context, b *bot.Bot, update *mo
 	keyboard = append(keyboard, []models.InlineKeyboardButton{
 		h.translation.GetButton(langCode, "back_button").InlineCallback(CallbackBuy),
 	})
+
+	return keyboard
+}
+
+func (h Handler) SellCallbackHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+	callback := update.CallbackQuery.Message.Message
+	callbackQuery := parseCallbackData(update.CallbackQuery.Data)
+	langCode := update.CallbackQuery.From.LanguageCode
+	month := callbackQuery["month"]
+	amount := callbackQuery["amount"]
+
+	keyboard := h.BuildSellKeyboard(ctx, callback.Chat.ID, langCode, month, amount)
 
 	_, err := b.EditMessageReplyMarkup(ctx, &bot.EditMessageReplyMarkupParams{
 		ChatID:    callback.Chat.ID,
