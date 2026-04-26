@@ -20,22 +20,37 @@ func (h Handler) BuyCallbackHandler(ctx context.Context, b *bot.Bot, update *mod
 	callback := update.CallbackQuery.Message.Message
 	langCode := update.CallbackQuery.From.LanguageCode
 
+	usdRate := 0.0
+	if h.exchangeProvider != nil {
+		if r, err := h.exchangeProvider.USDRate(ctx); err == nil && r > 0 {
+			usdRate = r
+		} else if err != nil {
+			slog.Warn("USD rate unavailable, hiding USD on price buttons", "error", err)
+		}
+	}
+
+	makePriceButton := func(key string, months, amount int) models.InlineKeyboardButton {
+		btn := h.translation.GetButton(langCode, key)
+		btn.Text = formatPriceButton(btn.Text, amount, usdRate)
+		return btn.InlineCallback(fmt.Sprintf("%s?month=%d&amount=%d", CallbackSell, months, amount))
+	}
+
 	var priceButtons []models.InlineKeyboardButton
 
 	if config.Price1() > 0 {
-		priceButtons = append(priceButtons, h.translation.GetButton(langCode, "month_1").InlineCallback(fmt.Sprintf("%s?month=%d&amount=%d", CallbackSell, 1, config.Price1())))
+		priceButtons = append(priceButtons, makePriceButton("month_1", 1, config.Price1()))
 	}
 
 	if config.Price3() > 0 {
-		priceButtons = append(priceButtons, h.translation.GetButton(langCode, "month_3").InlineCallback(fmt.Sprintf("%s?month=%d&amount=%d", CallbackSell, 3, config.Price3())))
+		priceButtons = append(priceButtons, makePriceButton("month_3", 3, config.Price3()))
 	}
 
 	if config.Price6() > 0 {
-		priceButtons = append(priceButtons, h.translation.GetButton(langCode, "month_6").InlineCallback(fmt.Sprintf("%s?month=%d&amount=%d", CallbackSell, 6, config.Price6())))
+		priceButtons = append(priceButtons, makePriceButton("month_6", 6, config.Price6()))
 	}
 
 	if config.Price12() > 0 {
-		priceButtons = append(priceButtons, h.translation.GetButton(langCode, "month_12").InlineCallback(fmt.Sprintf("%s?month=%d&amount=%d", CallbackSell, 12, config.Price12())))
+		priceButtons = append(priceButtons, makePriceButton("month_12", 12, config.Price12()))
 	}
 
 	keyboard := [][]models.InlineKeyboardButton{}
@@ -64,6 +79,15 @@ func (h Handler) BuyCallbackHandler(ctx context.Context, b *bot.Bot, update *mod
 	if err != nil {
 		slog.Error("Error sending buy message", "error", err)
 	}
+}
+
+// formatPriceButton appends the RUB amount (and optionally an approximate USD
+// equivalent) to a tariff button label like "1 месяц".
+func formatPriceButton(baseText string, rub int, usdRate float64) string {
+	if usdRate > 0 {
+		return fmt.Sprintf("%s — %d ₽ (~$%.2f)", baseText, rub, float64(rub)/usdRate)
+	}
+	return fmt.Sprintf("%s — %d ₽", baseText, rub)
 }
 
 // BuildSellKeyboard returns the payment-methods keyboard for a given month/amount.
