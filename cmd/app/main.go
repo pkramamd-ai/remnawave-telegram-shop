@@ -145,6 +145,15 @@ func main() {
 		LanguageCode: "en",
 	})
 
+	// Set bot commands for Chinese
+	_, err = b.SetMyCommands(ctx, &bot.SetMyCommandsParams{
+		Commands: []models.BotCommand{
+			{Command: "start", Description: "开始使用机器人"},
+			{Command: "connect", Description: "连接"},
+		},
+		LanguageCode: "zh",
+	})
+
 	config.SetBotURL(fmt.Sprintf("https://t.me/%s", me.Username))
 
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypePrefix, h.StartCommandHandler, h.SuspiciousUserFilterMiddleware)
