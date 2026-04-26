@@ -69,6 +69,27 @@ func (h Handler) StartCommandHandler(ctx context.Context, b *bot.Bot, update *mo
 		}
 	}
 
+	// Refresh the per-chat menu button on every /start. Telegram only applies
+	// the bot's *global* default menu button to chats that have not seen any
+	// per-chat configuration; clients that opened the chat before the global
+	// default existed will keep showing the old "commands" button. Setting
+	// the per-chat button here guarantees every active user sees the Mini
+	// App entry point, without requiring them to clear cache or re-add the
+	// bot.
+	if mini := config.GetMiniAppURL(); mini != "" {
+		_, err := b.SetChatMenuButton(ctx, &bot.SetChatMenuButtonParams{
+			ChatID: update.Message.Chat.ID,
+			MenuButton: models.MenuButtonWebApp{
+				Type:   models.MenuButtonTypeWebApp,
+				Text:   "VPN",
+				WebApp: models.WebAppInfo{URL: mini},
+			},
+		})
+		if err != nil {
+			slog.Warn("could not set per-chat menu button", "error", err)
+		}
+	}
+
 	inlineKeyboard := h.buildStartKeyboard(existingCustomer, langCode)
 
 	m, err := b.SendMessage(ctx, &bot.SendMessageParams{
